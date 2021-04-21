@@ -64,8 +64,9 @@ onmessage = (event) => {
     formFields.lastUpdatedDate['innerHTML'] = getFieldValue(data.lastUpdatedDate)
   }
 
-  if (type === 'sync') {
+  if (type === 'sync' || type === 'sync-selected') {
     console.log('sync called')
+    console.log('msg.varNames: ' + msg.varNames)
     const getAllStrings = async () => {
 
       let allStringsArr = await getStringsFromAirtable(msg.airtableConfig, msg.varNames)
@@ -75,7 +76,7 @@ onmessage = (event) => {
       // console.log(allStringsObj) // debug
 
       var msgToPlugin = {
-        type: 'sync-airtable-strings',
+        type: type === 'sync' ? 'sync-airtable-strings' : 'sync-airtable-strings-selected',
         strings: allStringsObj
       }
 
