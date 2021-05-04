@@ -54,23 +54,29 @@ export const syncStrings = (airtableData: object) => {
 }
 
 export const syncStringsSelected = (airtableData: object) => {
-  const nodes = (figma.currentPage.selection[0] as ChildrenMixin).findAll(node => node.type === "TEXT");
+  if (figma.currentPage.selection.length < 1) {
+    figma.notify('Nothing is selected!', { timeout: 10000 })
+    figma.closePlugin();
+  }
+  else {
+    const nodes = (figma.currentPage.selection[0] as ChildrenMixin).findAll(node => node.type === "TEXT");
 
-  nodes.forEach(async (node: TextNode) => {
-    if (!isVar(node.name)) return
-
-    let nodeHierarchy = getNodeHierarchy(node)
-    console.log(`Working on ${nodeHierarchy}...`)
-
-    // If there are missing fonts, fail gracefully and move on.
-    if (handleMissingFont(node, nodeHierarchy) === true) return
-
-    node.autoRename = false // Don't auto-rename node on text change
-
-    replaceTheText(node, nodeHierarchy, airtableData)
-
-    console.log('Done.')
-  })
+    nodes.forEach(async (node: TextNode) => {
+      if (!isVar(node.name)) return
+  
+      let nodeHierarchy = getNodeHierarchy(node)
+      console.log(`Working on ${nodeHierarchy}...`)
+  
+      // If there are missing fonts, fail gracefully and move on.
+      if (handleMissingFont(node, nodeHierarchy) === true) return
+  
+      node.autoRename = false // Don't auto-rename node on text change
+  
+      replaceTheText(node, nodeHierarchy, airtableData)
+  
+      console.log('Done.')
+    })
+  }
 }
 
 const handleMissingFont = (node: TextNode, nodeHierarchy: string) => {

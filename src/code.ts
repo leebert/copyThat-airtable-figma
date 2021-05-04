@@ -57,26 +57,32 @@ if (figma.command === 'sync-selected' ) {
   let varNames = [];
   let fontsToLoad: FontName[] = [];
 
-  // Find all text nodes
-  const nodes = (figma.currentPage.selection[0] as ChildrenMixin).findAll(node => node.type === "TEXT");
+  if (figma.currentPage.selection.length < 1) {
+    figma.notify('Nothing is selected!', { timeout: 10000 })
+    figma.closePlugin();
+  }
+  else {
+    // Find all text nodes
+    const nodes = (figma.currentPage.selection[0] as ChildrenMixin).findAll(node => node.type === "TEXT");
 
-  // Delete the old report node (if it's there), and make a new one
-  createReportNode();
+    // Delete the old report node (if it's there), and make a new one
+    createReportNode();
 
-  // If variable is found in node name, add to varNames array
-  nodes.forEach(async (node: TextNode) => {
-    if (!isVar(node.name)) return;
+    // If variable is found in node name, add to varNames array
+    nodes.forEach(async (node: TextNode) => {
+      if (!isVar(node.name)) return;
 
-    getNodeFonts(node).forEach((font) => fontsToLoad.push(font))
-    console.log('adding "' + getVarName(node.name) + '"')
-    varNames.push(getVarName(node.name));
-  });
+      getNodeFonts(node).forEach((font) => fontsToLoad.push(font))
+      console.log('adding "' + getVarName(node.name) + '"')
+      varNames.push(getVarName(node.name));
+    });
 
-  // Continue only after the fonts load
-  Promise.all([loadFontList(fontsToLoad)]).then(() => {
-    figma.showUI(__html__, { visible: false });
-    figma.ui.postMessage({ type: 'sync-selected', airtableConfig, varNames });
-  })
+    // Continue only after the fonts load
+    Promise.all([loadFontList(fontsToLoad)]).then(() => {
+      figma.showUI(__html__, { visible: false });
+      figma.ui.postMessage({ type: 'sync-selected', airtableConfig, varNames });
+    })
+  }
 }
 
 // Calls to "parent.postMessage" from within the HTML page will trigger this
